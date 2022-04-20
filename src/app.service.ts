@@ -38,11 +38,10 @@ export class AppService {
 
     let current = new Date();    
     if(usr[0].exp_date < current) {
-      
       current.setDate(current.getDate()+1);
       const user = usr;
       user[0].exp_date = current;
-      await this.usersRepository.update(usr[0].exp_date,user[0]);
+      await this.usersRepository.save({id:user[0].id, exp_date:user[0].exp_date});
 
       ans.result='ok';
       return ans;  
