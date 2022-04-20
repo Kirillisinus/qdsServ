@@ -11,4 +11,9 @@ export class AppController {
   async login(@Param('name') name): Promise<any> {
     return this.appService.login(name);
   }
+
+  @Get('players')
+  async players(): Promise<any> {
+    return this.appService.players();
+  }
 }
