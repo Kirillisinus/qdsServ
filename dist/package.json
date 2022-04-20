@@ -1,0 +1,10 @@
+{
+  "name": "nestjs-app",
+  "version": "0.1.0",
+  "description": "Heroku My App",
+  "author": "Kirillisimus",
+  "private": true,
+  "engines": {
+    "node": "16.14.2"
+  }
+}
