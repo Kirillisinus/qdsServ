@@ -8,20 +8,16 @@ import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    Users,
     ConfigModule.forRoot(),
-    TypeOrmModule.forRoot(
-      {
-        type: 'postgres',
-        url: process.env.DATABASE_URL,
-        entities: ['dist/**/*.entity{.ts,.js}'],
-        synchronize: false,
-        autoLoadEntities: true,
-        extra: {
-          rejectUnauthorized: false
-        }
-      }
-    )
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      url: process.env.DATABASE_URL,
+      entities: ['dist/**/*.entity{.ts,.js}'],
+      synchronize: false,
+      autoLoadEntities: true,
+      ssl: { rejectUnauthorized: false }
+    }),
+    TypeOrmModule.forFeature([Users]),
   ],
   controllers: [AppController],
   providers: [AppService, EnterGame],

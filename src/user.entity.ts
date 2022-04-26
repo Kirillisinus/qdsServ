@@ -6,7 +6,7 @@ export class Users {
   user: string;
 
   @PrimaryGeneratedColumn()
-  id: number;
+  id?: number;
 
   @Column('timestamp without time zone')
   exp_date: Date;
