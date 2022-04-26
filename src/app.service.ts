@@ -20,17 +20,19 @@ export class AppService {
     if(Object.keys(usr).length<=0){
       let current = new Date();
       current.setDate(current.getDate()+1);
-      const nextId = this.usersRepository.findOne({order: { id: "DESC", }});
+      const nextId = await this.usersRepository.query('SELECT nextval(\'user_pkid\')');
+      console.log(nextId);
 
       const user = new Users();
-      user.id=(await nextId).id+1;
+      user.id=nextId[0].nextval;
       user.user=name;
       user.exp_date = current ;
       user.in_game=false;
       user.in_lobby=false;
       user.is_admin=false;
 
-      await this.usersRepository.save(user);
+      //await this.usersRepository.save(user);
+      await this.usersRepository.query("INSERT INTO users(id, \"user\", exp_date, in_lobby, in_game, is_admin) VALUES ($1, $2, $3, $4, $5, $6)",[nextId[0].nextval,name,current,false,false,false]);
       
       ans.result="ok";
       return ans;
@@ -51,6 +53,6 @@ export class AppService {
   }
 
   async players(): Promise<any> {
-
+    return this.usersRepository.query('SELECT nextval(\'user_pkid\')');
   }
 }
