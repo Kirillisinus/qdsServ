@@ -15,7 +15,8 @@ import { Users } from './user.entity';
       password: '1234',
       database: 'appdb',
       entities: [Users],
-      synchronize: true,
+      synchronize: false,
+      logging: true
     }),
     TypeOrmModule.forFeature([Users])
   ],

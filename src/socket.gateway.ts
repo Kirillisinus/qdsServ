@@ -6,6 +6,11 @@ import {
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Socket, Server } from 'socket.io';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, UpdateResult } from 'typeorm';
+import { Users } from './user.entity';
+
 
 @WebSocketGateway({
   cors: {
@@ -15,22 +20,27 @@ import { Socket, Server } from 'socket.io';
   },
 })
 export class EnterGame {
+  constructor(
+    @InjectRepository(Users)
+    private readonly usersRepository: Repository<Users>,
+  ) {}
+
   @WebSocketServer()
   server: Server;
-
   private logger: Logger = new Logger('EnterGame');
 
-  @SubscribeMessage('msgToServer')
-  handleMessage(client: Socket, payload: string): void {
-    this.server.emit('msgToClient', payload);
-    console.log(payload);
+  @SubscribeMessage('enterLobby')
+  async handleMessage(client: Socket, payload: string): Promise<void> {
+    await this.usersRepository.query("UPDATE users u SET in_lobby=true, socket_id=$1 WHERE u.user=$2",[client.id,payload]);
+    this.logger.log('NIHUYA SEBE');
   }
 
   afterInit(server: Server) {
     this.logger.log('Init');
   }
 
-  handleDisconnect(client: Socket) {
+  async handleDisconnect(client: Socket) {
+    await this.usersRepository.query("UPDATE users u SET in_lobby=false, socket_id=NULL WHERE u.socket_id=$1",[client.id]);
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
