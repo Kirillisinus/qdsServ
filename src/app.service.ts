@@ -22,13 +22,13 @@ export class AppService {
       current.setDate(current.getDate()+1);
       const nextId = await this.usersRepository.query('SELECT nextval(\'user_pkid\')');
 
-      const user = new Users();
+      /*const user = new Users();
       user.id=nextId[0].nextval;
       user.user=name;
       user.exp_date = current ;
       user.in_game=false;
       user.in_lobby=false;
-      user.is_admin=false;
+      user.is_admin=false;*/
 
       await this.usersRepository.query("INSERT INTO users(id, \"user\", exp_date, in_lobby, in_game, is_admin) VALUES ($1, $2, $3, $4, $5, $6)",[nextId[0].nextval,name,current,false,false,false]);
       
@@ -36,8 +36,8 @@ export class AppService {
       return ans;
     }
 
-    let current = new Date();    
-    if(usr[0].exp_date < current) {
+    /*if(usr[0].exp_date < current) {
+      let current = new Date();  
       current.setDate(current.getDate()+1);
       const user = usr;
       user[0].exp_date = current;
@@ -45,8 +45,8 @@ export class AppService {
 
       ans.result='ok';
       return ans;  
-    }
-    
+    }*/
+    ans.result='ok';
     return ans;
   }
 

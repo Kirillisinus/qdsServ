@@ -45,6 +45,9 @@ export class EnterGame {
   }
 
   handleConnection(client: Socket, ...args: any[]) {
+    this.server.emit('msg',client.id);
     this.logger.log(`Client connected: ${client.id}`);
   }
+
+  
 }
