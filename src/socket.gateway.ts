@@ -34,7 +34,7 @@ export class EnterGame {
     await this.usersRepository.query("UPDATE users u SET in_lobby=true, socket_id=$1 WHERE u.user=$2",[client.id,payload]);
 
     const usr1 = await this.usersRepository.query("SELECT u.user FROM users as u WHERE u.socket_id=$1",[client.id]);
-    this.server.emit('msg',usr1[0]);
+    this.server.emit('enterMsg',usr1[0]);
 
     this.logger.log(`Client with id: ${client.id}`+" join to lobby");
   }
@@ -42,11 +42,23 @@ export class EnterGame {
   @SubscribeMessage('exitLobby')
   async exitLobby(client: Socket, payload: string): Promise<void> {
     await this.usersRepository.query("UPDATE users u SET in_lobby=false WHERE u.user=$1",[payload]);
-    
+
     const usr1 = await this.usersRepository.query("SELECT u.user FROM users as u WHERE u.socket_id=$1",[client.id]);
-    this.server.emit('msg',usr1[0]);
+    this.server.emit('exitMsg',usr1[0]);
 
     this.logger.log(`Client with id: ${client.id}`+" left lobby");
+  }
+
+  /*@SubscribeMessage('ready')
+  async ready(client: Socket, payload: string): Promise<void> {
+    await this.usersRepository.query("UPDATE users u SET is_ready=true WHERE u.user=$1",[payload]);
+
+    this.logger.log(`Client with id: ${client.id}`+" is ready now");
+  }*/
+
+  @SubscribeMessage('startGame')
+  startGame(){
+      this.server.emit('startMsg');
   }
 
   afterInit(server: Server) {
