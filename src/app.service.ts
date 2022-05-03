@@ -16,6 +16,7 @@ export class AppService {
     let ans:any = {result:'notok'};
 
     const usr =  await this.usersRepository.find({ where: { user: name } });
+    console.log(usr[0]);
 
     if(Object.keys(usr).length<=0){
       let current = new Date();
@@ -36,17 +37,18 @@ export class AppService {
       return ans;
     }
 
-    /*if(usr[0].exp_date < current) {
-      let current = new Date();  
-      current.setDate(current.getDate()+1);
+    let current = new Date();  
+    current.setDate(current.getDate()+1);
       const user = usr;
       user[0].exp_date = current;
-      await this.usersRepository.save({id:user[0].id, exp_date:user[0].exp_date});
+      
 
+    if(!usr[0].in_lobby || usr[0].in_game) {
       ans.result='ok';
+      await this.usersRepository.save({id:user[0].id, exp_date:user[0].exp_date});
       return ans;  
-    }*/
-    ans.result='ok';
+    }
+
     return ans;
   }
 

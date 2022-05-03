@@ -30,9 +30,8 @@ export class EnterGame {
   private logger: Logger = new Logger('EnterGame');
 
   @SubscribeMessage('enterLobby')
-  async handleMessage(client: Socket, payload: string): Promise<void> {
+  async enterLobby(client: Socket, payload: string): Promise<void> {
     await this.usersRepository.query("UPDATE users u SET in_lobby=true, socket_id=$1 WHERE u.user=$2",[client.id,payload]);
-    this.logger.log('NIHUYA SEBE');
   }
 
   afterInit(server: Server) {
@@ -44,8 +43,9 @@ export class EnterGame {
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
-  handleConnection(client: Socket, ...args: any[]) {
-    this.server.emit('msg',client.id);
+  async handleConnection(client: Socket, ...args: any[]) {
+    const usr = await this.usersRepository.query("SELECT user FROM users as u WHERE u.socket_id=$1",[client.id]);
+    this.server.emit('msg',usr[0]);
     this.logger.log(`Client connected: ${client.id}`);
   }
 
