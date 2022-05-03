@@ -16,4 +16,9 @@ export class AppController {
   async players(): Promise<any> {
     return this.appService.players();
   }
+
+  @Get('join/:name')
+  async join(@Param('name') name): Promise<any> {
+    return this.appService.join(name);
+  }
 }

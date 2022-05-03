@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
 import { Users } from './user.entity';
 import { User } from './user.model';
+import { EnterGame } from './socket.gateway'
 
 @Injectable()
 export class AppService {
@@ -16,7 +17,6 @@ export class AppService {
     let ans:any = {result:'notok'};
 
     const usr =  await this.usersRepository.find({ where: { user: name } });
-    console.log(usr[0]);
 
     if(Object.keys(usr).length<=0){
       let current = new Date();
@@ -55,5 +55,9 @@ export class AppService {
   async players(): Promise<any> {
     const users =  await this.usersRepository.query("SELECT u.user FROM users as u where u.in_lobby=true and u.exp_date > CURRENT_DATE;");
     return users;
+  }
+
+  join(name: string): any {
+    
   }
 }

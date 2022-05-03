@@ -32,6 +32,21 @@ export class EnterGame {
   @SubscribeMessage('enterLobby')
   async enterLobby(client: Socket, payload: string): Promise<void> {
     await this.usersRepository.query("UPDATE users u SET in_lobby=true, socket_id=$1 WHERE u.user=$2",[client.id,payload]);
+
+    const usr1 = await this.usersRepository.query("SELECT u.user FROM users as u WHERE u.socket_id=$1",[client.id]);
+    this.server.emit('msg',usr1[0]);
+
+    this.logger.log(`Client with id: ${client.id}`+" join to lobby");
+  }
+
+  @SubscribeMessage('exitLobby')
+  async exitLobby(client: Socket, payload: string): Promise<void> {
+    await this.usersRepository.query("UPDATE users u SET in_lobby=false WHERE u.user=$1",[payload]);
+    
+    const usr1 = await this.usersRepository.query("SELECT u.user FROM users as u WHERE u.socket_id=$1",[client.id]);
+    this.server.emit('msg',usr1[0]);
+
+    this.logger.log(`Client with id: ${client.id}`+" left lobby");
   }
 
   afterInit(server: Server) {
@@ -44,8 +59,6 @@ export class EnterGame {
   }
 
   async handleConnection(client: Socket, ...args: any[]) {
-    const usr = await this.usersRepository.query("SELECT user FROM users as u WHERE u.socket_id=$1",[client.id]);
-    this.server.emit('msg',usr[0]);
     this.logger.log(`Client connected: ${client.id}`);
   }
 
