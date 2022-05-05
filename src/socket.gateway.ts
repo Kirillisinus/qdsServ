@@ -14,7 +14,7 @@ import { Users } from './user.entity';
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://localhost:8080',
+    origin: '*',
     credentials: true,
     allowEIO3: true
   },
@@ -28,6 +28,10 @@ export class EnterGame {
   @WebSocketServer()
   server: Server;
   private logger: Logger = new Logger('EnterGame');
+
+  ready_of_all: number = 0;
+
+  
 
   @SubscribeMessage('enterLobby')
   async enterLobby(client: Socket, payload: string): Promise<void> {
@@ -67,6 +71,10 @@ export class EnterGame {
 
   async handleDisconnect(client: Socket) {
     await this.usersRepository.query("UPDATE users u SET in_lobby=false, socket_id=NULL WHERE u.socket_id=$1",[client.id]);
+
+    const usr1 = await this.usersRepository.query("SELECT u.user FROM users as u WHERE u.socket_id=$1",[client.id]);
+    this.server.emit('exitMsg',usr1[0]);
+    
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
