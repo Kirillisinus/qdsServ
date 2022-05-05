@@ -19,4 +19,7 @@ export class Users {
 
   @Column('boolean')
   is_admin:boolean;
+
+  @Column('varchar')
+  socket_id:string;
 }
