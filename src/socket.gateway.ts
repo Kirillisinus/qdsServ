@@ -28,7 +28,9 @@ export class EnterGame {
   @WebSocketServer()
   server: Server;
   private logger: Logger = new Logger('EnterGame');
+  
 
+  users: any[];
   ready_of_all: number = 0;
 
   
@@ -61,8 +63,35 @@ export class EnterGame {
   }*/
 
   @SubscribeMessage('startGame')
-  startGame(){
-      this.server.emit('startMsg');
+  async startGame(){
+    await this.usersRepository.query("UPDATE users u SET in_lobby=false, in_game=true WHERE u.in_lobby=true");
+
+    const ids_of_users = await this.usersRepository.query("SELECT u.id FROM users u WHERE in_game=true");
+    console.log(ids_of_users);
+
+    this.users=ids_of_users;
+
+    this.ready_of_all = ids_of_users.length;    
+  
+    this.server.emit('startMsg');
+  }
+
+  @SubscribeMessage('writeSentence')
+  async writeSentence(data: string){
+      // запись в таблицу игровой сессии строки
+      if(this.ready_of_all <=0){
+        this.ready_of_all = this.users.length;
+      }
+      this.ready_of_all--;
+  }
+
+  @SubscribeMessage('drawImage')
+  async drawImage(data: string){
+      //запись в таблицу игровой сессии строки изображения
+      if(this.ready_of_all <=0){
+        this.ready_of_all = this.users.length;
+      }
+      this.ready_of_all--;
   }
 
   afterInit(server: Server) {

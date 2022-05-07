@@ -8,7 +8,7 @@ import { Users } from './user.entity';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'postgres',
+      /*type: 'postgres',
       host: 'localhost',
       port: 5432,
       username: 'postgres',
@@ -16,8 +16,8 @@ import { Users } from './user.entity';
       database: 'appdb',
       entities: [Users],
       synchronize: false,
-      logging: true
-      /*type: 'postgres',
+      logging: true*/
+      type: 'postgres',
       host: 'ec2-63-32-248-14.eu-west-1.compute.amazonaws.com',
       port: 5432,
       username: 'awjqkgiaynfnrq',
@@ -27,7 +27,7 @@ import { Users } from './user.entity';
       synchronize: false,
       logging: true,
       autoLoadEntities: true,
-      ssl: { rejectUnauthorized: false }*/
+      ssl: { rejectUnauthorized: false }
     }),
     TypeOrmModule.forFeature([Users])
   ],
