@@ -11,7 +11,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
 import { Users } from './user.entity';
 
-
 @WebSocketGateway({
   cors: {
     origin: '*',
@@ -29,15 +28,13 @@ export class EnterGame {
   server: Server;
   private logger: Logger = new Logger('EnterGame');
   
-
-  users: any[];
+  users: number[] = [];
   ready_of_all: number = 0;
 
-  
 
   @SubscribeMessage('enterLobby')
   async enterLobby(client: Socket, payload: string): Promise<void> {
-    await this.usersRepository.query("UPDATE users u SET in_lobby=true, socket_id=$1 WHERE u.user=$2",[client.id,payload]);
+    await this.usersRepository.query("UPDATE users u SET in_game=false, in_lobby=true, socket_id=$1 WHERE u.user=$2",[client.id,payload]);
 
     const usr1 = await this.usersRepository.query("SELECT u.user FROM users as u WHERE u.socket_id=$1",[client.id]);
     this.server.emit('enterMsg',usr1[0]);
@@ -66,10 +63,11 @@ export class EnterGame {
   async startGame(){
     await this.usersRepository.query("UPDATE users u SET in_lobby=false, in_game=true WHERE u.in_lobby=true");
 
-    const ids_of_users = await this.usersRepository.query("SELECT u.id FROM users u WHERE in_game=true");
-    console.log(ids_of_users);
-
-    this.users=ids_of_users;
+    const ids_of_users = await this.usersRepository.query("SELECT u.id FROM users u WHERE u.in_game=true");
+    
+    for(var i = 0; i<ids_of_users.length;i++){
+      this.users.push(ids_of_users[i].id);
+    }
 
     this.ready_of_all = ids_of_users.length;    
   
@@ -79,19 +77,32 @@ export class EnterGame {
   @SubscribeMessage('writeSentence')
   async writeSentence(data: string){
       // запись в таблицу игровой сессии строки
+
+      this.ready_of_all--;
+
       if(this.ready_of_all <=0){
         this.ready_of_all = this.users.length;
       }
-      this.ready_of_all--;
+      
+      this.server.emit('goNextMsg');
   }
 
   @SubscribeMessage('drawImage')
   async drawImage(data: string){
       //запись в таблицу игровой сессии строки изображения
+
+      this.ready_of_all--;
+
       if(this.ready_of_all <=0){
         this.ready_of_all = this.users.length;
       }
-      this.ready_of_all--;
+      
+      this.server.emit('goNextMsg');
+  }
+
+  @SubscribeMessage('timeIsUp')
+  async timeIsUp(){
+    
   }
 
   afterInit(server: Server) {
@@ -99,9 +110,19 @@ export class EnterGame {
   }
 
   async handleDisconnect(client: Socket) {
-    await this.usersRepository.query("UPDATE users u SET in_lobby=false, socket_id=NULL WHERE u.socket_id=$1",[client.id]);
-
     const usr1 = await this.usersRepository.query("SELECT u.user FROM users as u WHERE u.socket_id=$1",[client.id]);
+    const usr1_name = await this.usersRepository.query("SELECT u.id FROM users as u WHERE u.socket_id=$1",[client.id]);
+
+    try{
+    const index = this.users.indexOf(usr1_name[0].id, 0);
+    if (index > -1) {
+      this.users.splice(index, 1);
+    }
+    }
+    catch{}
+
+    await this.usersRepository.query("UPDATE users u SET in_game=false, in_lobby=false, socket_id=NULL WHERE u.socket_id=$1",[client.id]);
+
     this.server.emit('exitMsg',usr1[0]);
     
     this.logger.log(`Client disconnected: ${client.id}`);
