@@ -10,10 +10,24 @@ import { ConfigModule } from '@nestjs/config';
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
-      type: 'postgres',
-      url: process.env.DATABASE_URL,
-      entities: ['dist/**/*.entity{.ts,.js}'],
+      /*type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: '1234',
+      database: 'appdb',
+      entities: [Users],
       synchronize: false,
+      logging: true*/
+      type: 'postgres',
+      host: 'ec2-63-32-248-14.eu-west-1.compute.amazonaws.com',
+      port: 5432,
+      username: 'awjqkgiaynfnrq',
+      password: 'c69dd8fdc4129e39e5375e06c720358b4598d8d55a640fabd3fd59ebbbb2aed8',
+      database: 'd1uvmmelf3brrh',
+      entities: [Users],
+      synchronize: false,
+      logging: true,
       autoLoadEntities: true,
       ssl: { rejectUnauthorized: false }
     }),
