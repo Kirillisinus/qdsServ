@@ -29,10 +29,15 @@ export class EnterGame {
   private logger: Logger = new Logger('EnterGame');
   
   users: number[] = [];
+
   ready_of_all: number = 0;
+
   num_of_rounds: number = 0;
   round_now: number = 0;
+  time_of_round:number = 15;
+
   arr_of_next_pages: string[] = [];
+
   admin_id:number=0;
 
 
@@ -81,18 +86,18 @@ export class EnterGame {
     }
     await this.usersRepository.query("UPDATE users u SET in_lobby=false, in_game=true WHERE u.in_lobby=true");
 
-    const ids_of_users = await this.usersRepository.query("SELECT u.id FROM users u WHERE u.in_game=true");
+    const ids_of_users = await this.usersRepository.query("SELECT u.id FROM users u WHERE u.in_game=true AND u.socket_id IS NOT NULL");
     
     for(var i = 0; i<ids_of_users.length;i++){
       this.users.push(ids_of_users[i].id);
     }
 
-    this.ready_of_all = ids_of_users.length;    
+    this.ready_of_all = ids_of_users.length;
     this.num_of_rounds = ids_of_users.length;
 
     let turn: boolean = false;
-    for(var i = 0; i <= this.num_of_rounds; i++ ){
-      if(i=this.num_of_rounds) {
+    for(var i = 1; i <= this.num_of_rounds; i++ ){
+      if(i===this.num_of_rounds) {
         this.arr_of_next_pages.push("album");
       }
       else if(!turn){
@@ -106,8 +111,17 @@ export class EnterGame {
     }
 
     this.round_now = 0;
+
+    this.logger.log("users: " + this.users);
+    this.logger.log("ready_of_all: " + this.ready_of_all);
+    this.logger.log("num_of_rounds: " + this.num_of_rounds);
+    this.logger.log("round_now: " + this.round_now);
+    this.logger.log("time_of_round: " + this.time_of_round);
+    this.logger.log("arr_of_next_pages: " + this.arr_of_next_pages);
+    this.logger.log("admin_id: " + this.admin_id);
+    
   
-    this.server.emit('startMsg');
+    this.server.emit('startMsg', this.time_of_round);
   }
 
   @SubscribeMessage('writeSentence')
@@ -118,9 +132,23 @@ export class EnterGame {
 
       if(this.ready_of_all <=0){
         this.ready_of_all = this.users.length;
-        
-        this.server.emit('goNextMsg', this.arr_of_next_pages[this.round_now]);
-        this.round_now++;
+
+        if(this.users.length > 1) {
+          this.logger.log(5*this.users.length);
+          this.time_of_round += 5*this.users.length;
+        }       
+
+        this.logger.log("go to " + this.arr_of_next_pages[this.round_now]);
+        this.logger.log("users: " + this.users);
+        this.logger.log("ready_of_all: " + this.ready_of_all);
+        this.logger.log("num_of_rounds: " + this.num_of_rounds);
+        this.logger.log("round_now: " + this.round_now);
+        this.logger.log("time_of_round: " + this.time_of_round);
+        this.logger.log("arr_of_next_pages: " + this.arr_of_next_pages);
+        this.logger.log("admin_id: " + this.admin_id);
+
+        this.server.emit('goNextMsg', { next_page: this.arr_of_next_pages[this.round_now], round_time: this.time_of_round});   
+        this.round_now++; 
       }
   }
 
@@ -133,8 +161,21 @@ export class EnterGame {
       if(this.ready_of_all <=0){
         this.ready_of_all = this.users.length;
 
-        this.server.emit('goNextMsg', this.arr_of_next_pages[this.round_now]);
-        this.round_now++;
+        if(this.users.length > 1) {        
+          this.time_of_round += 5*this.users.length;
+        }
+
+        this.logger.log("go to " + this.arr_of_next_pages[this.round_now]);
+        this.logger.log("users: " + this.users);
+        this.logger.log("ready_of_all: " + this.ready_of_all);
+        this.logger.log("num_of_rounds: " + this.num_of_rounds);
+        this.logger.log("round_now: " + this.round_now);
+        this.logger.log("time_of_round: " + this.time_of_round);
+        this.logger.log("arr_of_next_pages: " + this.arr_of_next_pages);
+        this.logger.log("admin_id: " + this.admin_id);
+
+        this.server.emit('goNextMsg', { next_page: this.arr_of_next_pages[this.round_now], round_time: this.time_of_round});  
+        this.round_now++;    
       }
   }
 
