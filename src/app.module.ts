@@ -10,7 +10,7 @@ import { ConfigModule } from '@nestjs/config';
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
-      /*type: 'postgres',
+      type: 'postgres',
       host: 'localhost',
       port: 5432,
       username: 'postgres',
@@ -18,7 +18,8 @@ import { ConfigModule } from '@nestjs/config';
       database: 'appdb',
       entities: [Users],
       synchronize: false,
-      logging: true*/
+      logging: false
+      /*
       type: 'postgres',
       host: 'ec2-63-32-248-14.eu-west-1.compute.amazonaws.com',
       port: 5432,
@@ -29,7 +30,7 @@ import { ConfigModule } from '@nestjs/config';
       synchronize: false,
       logging: true,
       autoLoadEntities: true,
-      ssl: { rejectUnauthorized: false }
+      ssl: { rejectUnauthorized: false }*/
     }),
     TypeOrmModule.forFeature([Users]),
   ],
