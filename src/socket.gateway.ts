@@ -28,13 +28,15 @@ export class EnterGame {
   server: Server;
   private logger: Logger = new Logger('EnterGame');
 
+
+
   users: number[] = [];
 
   ready_of_all: number = 0;
 
   num_of_rounds: number = 0;
   round_now: number = 0;
-  time_of_round: number = 15;
+  time_of_round: number = 30;
 
   arr_of_next_pages: string[] = [];
 
@@ -79,7 +81,7 @@ export class EnterGame {
       [payload],
     );
 
-    this.server.emit('exitMsg');
+    this.server.emit('exitMsg', this.admin_name);
 
     this.logger.log(`Client with id: ${client.id}` + ' left lobby');
   }
@@ -132,13 +134,13 @@ export class EnterGame {
 
     this.round_now = 0;
 
-    this.logger.log('users: ' + this.users);
+    /*this.logger.log('users: ' + this.users);
     this.logger.log('ready_of_all: ' + this.ready_of_all);
     this.logger.log('num_of_rounds: ' + this.num_of_rounds);
     this.logger.log('round_now: ' + this.round_now);
     this.logger.log('time_of_round: ' + this.time_of_round);
     this.logger.log('arr_of_next_pages: ' + this.arr_of_next_pages);
-    this.logger.log('admin_id: ' + this.admin_id);
+    this.logger.log('admin_id: ' + this.admin_id);*/
 
     this.server.emit('startMsg', this.time_of_round);
 
@@ -146,20 +148,23 @@ export class EnterGame {
       this.time_of_round += 5 * this.users.length;
     }  
 
-    this.timerId = setTimeout(() => {
+    /*this.timerId = setTimeout(() => {
       this.server.emit('timeIsUp');
-      //clearTimeout(this.timerId);
-    },this.time_of_round*1000);
+       if (this.timerId) {
+            clearTimeout(this.timerId);
+            this.timerId = 0;
+        }
+    },this.time_of_round*1000);*/
   }
 
   @SubscribeMessage('writeSentence')
-  async writeSentence(data: string) {
+  async writeSentence(client: Socket, data: string) {
     // запись в таблицу игровой сессии строки
 
     this.ready_of_all--;
 
-    if (this.ready_of_all <= 0) {
-      clearTimeout(this.timerId);
+    if (this.ready_of_all <= 0) {      
+      //clearTimeout(this.timerId);     
       this.ready_of_all = this.users.length;
 
       if (this.users.length > 1) {
@@ -167,6 +172,7 @@ export class EnterGame {
       }
 
       this.logger.log('go to ' + this.arr_of_next_pages[this.round_now]);
+      this.logger.log('Client has written ' + data);
       this.logger.log('users: ' + this.users);
       this.logger.log('ready_of_all: ' + this.ready_of_all);
       this.logger.log('num_of_rounds: ' + this.num_of_rounds);
@@ -180,17 +186,25 @@ export class EnterGame {
         round_time: this.time_of_round,
       });
       this.round_now++;
+
+      /*this.timerId = setTimeout(() => {
+      this.server.emit('timeIsUp');
+      if (this.timerId) {
+            clearTimeout(this.timerId);
+            this.timerId = 0;
+        }     
+    },this.time_of_round*1000);*/
     }
   }
 
   @SubscribeMessage('drawImage')
-  async drawImage(data: string) {
+  async drawImage(client: Socket, data: string) {
     //запись в таблицу игровой сессии строки изображения
 
     this.ready_of_all--;
 
     if (this.ready_of_all <= 0) {
-      clearTimeout(this.timerId);
+      //clearTimeout(this.timerId);
       this.ready_of_all = this.users.length;
 
       if (this.users.length > 1) {
@@ -198,6 +212,7 @@ export class EnterGame {
       }
 
       this.logger.log('go to ' + this.arr_of_next_pages[this.round_now]);
+      this.logger.log('Client has drawed ' + data);
       this.logger.log('users: ' + this.users);
       this.logger.log('ready_of_all: ' + this.ready_of_all);
       this.logger.log('num_of_rounds: ' + this.num_of_rounds);
@@ -211,14 +226,25 @@ export class EnterGame {
         round_time: this.time_of_round,
       });
       this.round_now++;
+
+      /*this.timerId = setTimeout(() => {
+      this.server.emit('timeIsUp');
+      if (this.timerId) {
+            clearTimeout(this.timerId);
+            this.timerId = 0;
+        }
+    },this.time_of_round*1000);*/
     }
   }
 
-  /*@SubscribeMessage('timeIsUp')
+  @SubscribeMessage('timeIsUp')
   async timeIsUp() {
-    this.server.emit('goNextMsg', this.arr_of_next_pages[this.round_now]);
-    this.round_now++;
-  }*/
+    /*this.server.emit('goNextMsg', {
+        next_page: this.arr_of_next_pages[this.round_now],
+        round_time: this.time_of_round,
+      });*/
+      this.server.emit('timeIsUp');
+  }
 
   afterInit(server: Server) {
     this.logger.log('Init');
