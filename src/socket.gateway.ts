@@ -36,7 +36,7 @@ export class EnterGame {
 
   num_of_rounds: number = 0;
   round_now: number = 0;
-  time_of_round: number = 15;
+  time_of_round: number = 30;
 
   arr_of_next_pages: string[] = [];
 
@@ -148,14 +148,13 @@ export class EnterGame {
       this.time_of_round += 5 * this.users.length;
     }  
 
-    this.timerId = setTimeout(() => {
+    /*this.timerId = setTimeout(() => {
       this.server.emit('timeIsUp');
        if (this.timerId) {
             clearTimeout(this.timerId);
             this.timerId = 0;
         }
-      console.log(this.timerId);
-    },this.time_of_round*1000);
+    },this.time_of_round*1000);*/
   }
 
   @SubscribeMessage('writeSentence')
@@ -164,10 +163,8 @@ export class EnterGame {
 
     this.ready_of_all--;
 
-    if (this.ready_of_all <= 0) {
-      console.log(this.timerId);
-      clearTimeout(this.timerId);
-      console.log(this.timerId);
+    if (this.ready_of_all <= 0) {      
+      //clearTimeout(this.timerId);     
       this.ready_of_all = this.users.length;
 
       if (this.users.length > 1) {
@@ -190,13 +187,13 @@ export class EnterGame {
       });
       this.round_now++;
 
-      this.timerId = setTimeout(() => {
+      /*this.timerId = setTimeout(() => {
       this.server.emit('timeIsUp');
       if (this.timerId) {
             clearTimeout(this.timerId);
             this.timerId = 0;
         }     
-    },this.time_of_round*1000);
+    },this.time_of_round*1000);*/
     }
   }
 
@@ -207,7 +204,7 @@ export class EnterGame {
     this.ready_of_all--;
 
     if (this.ready_of_all <= 0) {
-      clearTimeout(this.timerId);
+      //clearTimeout(this.timerId);
       this.ready_of_all = this.users.length;
 
       if (this.users.length > 1) {
@@ -230,21 +227,24 @@ export class EnterGame {
       });
       this.round_now++;
 
-      this.timerId = setTimeout(() => {
+      /*this.timerId = setTimeout(() => {
       this.server.emit('timeIsUp');
       if (this.timerId) {
             clearTimeout(this.timerId);
             this.timerId = 0;
         }
-    },this.time_of_round*1000);
+    },this.time_of_round*1000);*/
     }
   }
 
-  /*@SubscribeMessage('timeIsUp')
+  @SubscribeMessage('timeIsUp')
   async timeIsUp() {
-    this.server.emit('goNextMsg', this.arr_of_next_pages[this.round_now]);
-    this.round_now++;
-  }*/
+    /*this.server.emit('goNextMsg', {
+        next_page: this.arr_of_next_pages[this.round_now],
+        round_time: this.time_of_round,
+      });*/
+      this.server.emit('timeIsUp');
+  }
 
   afterInit(server: Server) {
     this.logger.log('Init');
