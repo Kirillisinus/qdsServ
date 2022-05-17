@@ -4,20 +4,21 @@ import { AppService } from './app.service';
 import { EnterGame } from './socket.gateway'
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Users } from './user.entity';
+import { gameSession } from './gameSession.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      /*type: 'postgres',
+      type: 'postgres',
       host: 'localhost',
       port: 5432,
       username: 'postgres',
       password: '1234',
       database: 'appdb',
-      entities: [Users],
+      entities: [Users,gameSession],
       synchronize: false,
-      logging: false*/
-      
+      logging: true
+      /*
       type: 'postgres',
       host: 'ec2-63-32-248-14.eu-west-1.compute.amazonaws.com',
       port: 5432,
@@ -28,9 +29,9 @@ import { Users } from './user.entity';
       synchronize: false,
       logging: false,
       autoLoadEntities: true,
-      ssl: { rejectUnauthorized: false }
+      ssl: { rejectUnauthorized: false }*/
     }),
-    TypeOrmModule.forFeature([Users])
+    TypeOrmModule.forFeature([Users, gameSession])
   ],
   controllers: [AppController],
   providers: [AppService, EnterGame],

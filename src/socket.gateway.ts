@@ -10,6 +10,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
 import { Users } from './user.entity';
+import { gameSession } from './gameSession.entity';
 
 @WebSocketGateway({
   cors: {
@@ -22,6 +23,9 @@ export class EnterGame {
   constructor(
     @InjectRepository(Users)
     private readonly usersRepository: Repository<Users>,
+
+    @InjectRepository(gameSession)
+    private readonly gameRepository: Repository<gameSession>,
   ) {}
 
   @WebSocketServer()
@@ -134,13 +138,13 @@ export class EnterGame {
 
     this.round_now = 0;
 
-    /*this.logger.log('users: ' + this.users);
+    this.logger.log('users: ' + this.users);
     this.logger.log('ready_of_all: ' + this.ready_of_all);
     this.logger.log('num_of_rounds: ' + this.num_of_rounds);
     this.logger.log('round_now: ' + this.round_now);
     this.logger.log('time_of_round: ' + this.time_of_round);
     this.logger.log('arr_of_next_pages: ' + this.arr_of_next_pages);
-    this.logger.log('admin_id: ' + this.admin_id);*/
+    this.logger.log('admin_id: ' + this.admin_id);
 
     this.server.emit('startMsg', this.time_of_round);
 
@@ -159,7 +163,16 @@ export class EnterGame {
 
   @SubscribeMessage('writeSentence')
   async writeSentence(client: Socket, data: string) {
-    // запись в таблицу игровой сессии строки
+    const usr =  await this.usersRepository.find({ where: { socket_id: client.id } });
+    //const nextId = await this.usersRepository.query('SELECT nextval(\'game_session_pkid\')');
+
+    const session_row = new gameSession();
+    session_row.creator = usr[0].id;
+    session_row.prev;
+    session_row.data = data;
+    session_row.next;
+
+    await this.gameRepository.save(session_row);
 
     this.ready_of_all--;
 
@@ -172,7 +185,7 @@ export class EnterGame {
       }
 
       this.logger.log('go to ' + this.arr_of_next_pages[this.round_now]);
-      this.logger.log('Client has written ' + data);
+      this.logger.log('Client ' + client.id + ' has written ' + data);
       this.logger.log('users: ' + this.users);
       this.logger.log('ready_of_all: ' + this.ready_of_all);
       this.logger.log('num_of_rounds: ' + this.num_of_rounds);
@@ -199,7 +212,15 @@ export class EnterGame {
 
   @SubscribeMessage('drawImage')
   async drawImage(client: Socket, data: string) {
-    //запись в таблицу игровой сессии строки изображения
+    const usr =  await this.usersRepository.find({ where: { socket_id: client.id } });
+
+    const session_row = new gameSession();
+    session_row.creator = usr[0].id;
+    session_row.prev;
+    session_row.data = data;
+    session_row.next;
+
+    await this.gameRepository.save(session_row);
 
     this.ready_of_all--;
 
@@ -212,7 +233,7 @@ export class EnterGame {
       }
 
       this.logger.log('go to ' + this.arr_of_next_pages[this.round_now]);
-      this.logger.log('Client has drawed ' + data);
+      this.logger.log('Client ' + client.id + ' has drawed ' + 'data');
       this.logger.log('users: ' + this.users);
       this.logger.log('ready_of_all: ' + this.ready_of_all);
       this.logger.log('num_of_rounds: ' + this.num_of_rounds);
@@ -244,6 +265,11 @@ export class EnterGame {
         round_time: this.time_of_round,
       });*/
       this.server.emit('timeIsUp');
+  }
+
+  @SubscribeMessage('exitGame')
+  async exitGame() {
+    await this.gameRepository.query("TRUNCATE game_session RESTART IDENTITY;");
   }
 
   afterInit(server: Server) {
