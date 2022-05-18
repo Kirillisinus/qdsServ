@@ -3,13 +3,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
 import { Users } from './user.entity';
 import { User } from './user.model';
-import { EnterGame } from './socket.gateway'
+import { EnterGame } from './socket.gateway';
+import { gameSession } from './gameSession.entity';;
 
 @Injectable()
 export class AppService {
   constructor(
     @InjectRepository(Users)
     private readonly usersRepository: Repository<Users>,
+
+    @InjectRepository(gameSession)
+    private readonly gameRepository: Repository<gameSession>,
   ) {}
 
 
@@ -55,6 +59,22 @@ export class AppService {
   async players(): Promise<any> {
     const users =  await this.usersRepository.query("SELECT u.user FROM users as u where u.in_lobby=true and u.exp_date > CURRENT_DATE;");
     return users;
+  }
+
+  /*async whatToWrite(name: string, creator: string): Promise<any> {
+    const usr =  await this.usersRepository.find({ where: { user: name } });
+    const sentence = await this.gameRepository.findOne({ where: { creator: creator, next: usr[0].id } });
+    return sentence;
+  }*/
+
+  async whatToDraw(name: string, creator: string): Promise<any> {
+    const usr =  await this.usersRepository.find({ where: { user: name } });
+    const usr_crtr =  await this.usersRepository.find({ where: { user: creator } });
+
+    const thing = await this.gameRepository.findOne({ where: { next: usr[0].id } });//creator: usr_crtr[0].id, 
+    console.log(thing);
+
+    return thing.data;
   }
 
   join(name: string): any {

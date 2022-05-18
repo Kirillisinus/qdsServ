@@ -34,7 +34,7 @@ export class EnterGame {
 
 
 
-  users: number[] = [];
+  users: number[][] = [];
 
   ready_of_all: number = 0;
 
@@ -116,15 +116,20 @@ export class EnterGame {
       'SELECT u.id FROM users u WHERE u.in_game=true AND u.socket_id IS NOT NULL',
     );
 
-    for (var i = 0; i < ids_of_users.length; i++) {
-      this.users.push(ids_of_users[i].id);
+    for (let i = 0; i < ids_of_users.length; i++) {
+      //this.users[i] = [];
+      let variable = i+1;
+      if(variable>=ids_of_users.length){
+          variable = 0;
+      }
+      this.users.push([ids_of_users[i].id,variable]);
     }
 
     this.ready_of_all = ids_of_users.length;
     this.num_of_rounds = ids_of_users.length;
 
     let turn: boolean = false;
-    for (var i = 1; i <= this.num_of_rounds; i++) {
+    for (let i = 1; i <= this.num_of_rounds; i++) {
       if (i === this.num_of_rounds) {
         this.arr_of_next_pages.push('album');
       } else if (!turn) {
@@ -161,16 +166,27 @@ export class EnterGame {
     },this.time_of_round*1000);*/
   }
 
-  @SubscribeMessage('writeSentence')
-  async writeSentence(client: Socket, data: string) {
+  @SubscribeMessage('writeData')
+  async writeSentence(client: Socket, data: any) {
     const usr =  await this.usersRepository.find({ where: { socket_id: client.id } });
     //const nextId = await this.usersRepository.query('SELECT nextval(\'game_session_pkid\')');
+    let nextId = 0;
+    for(let i = 0; i < this.users.length; i++){
+        if(this.users[i][0] === usr[0].id) {
+            nextId = this.users[i][1];
+            i=this.users.length;
+        }
+    }
+
+    this.logger.log(data.sentence + " " + data.creator);
+
+    const usr_crtr =  await this.usersRepository.query("SELECT u.id FROM users as u where u.user=$1",[data.creator]);
 
     const session_row = new gameSession();
-    session_row.creator = usr[0].id;
-    session_row.prev;
-    session_row.data = data;
-    session_row.next;
+    session_row.creator = usr_crtr[0].id;
+    session_row.prev = usr[0].id;
+    session_row.data = data.sentence;
+    session_row.next = this.users[nextId][0];
 
     await this.gameRepository.save(session_row);
 
@@ -184,7 +200,7 @@ export class EnterGame {
         this.time_of_round -= 5;
       }
 
-      this.logger.log('go to ' + this.arr_of_next_pages[this.round_now]);
+      /*this.logger.log('go to ' + this.arr_of_next_pages[this.round_now]);
       this.logger.log('Client ' + client.id + ' has written ' + data);
       this.logger.log('users: ' + this.users);
       this.logger.log('ready_of_all: ' + this.ready_of_all);
@@ -192,13 +208,21 @@ export class EnterGame {
       this.logger.log('round_now: ' + this.round_now);
       this.logger.log('time_of_round: ' + this.time_of_round);
       this.logger.log('arr_of_next_pages: ' + this.arr_of_next_pages);
-      this.logger.log('admin_id: ' + this.admin_id);
+      this.logger.log('admin_id: ' + this.admin_id);*/
 
       this.server.emit('goNextMsg', {
         next_page: this.arr_of_next_pages[this.round_now],
         round_time: this.time_of_round,
       });
       this.round_now++;
+      
+      for (let i = 0; i < this.users.length; i++) {
+        let variable = this.users[i][1] + 1;
+        if(variable>=this.users.length){
+            variable = 0;
+        }
+        this.users[i][1] = variable;
+      }
 
       /*this.timerId = setTimeout(() => {
       this.server.emit('timeIsUp');
@@ -210,15 +234,31 @@ export class EnterGame {
     }
   }
 
-  @SubscribeMessage('drawImage')
+ /* @SubscribeMessage('whatToWrite')
+  async whatWrite() {
+    this.server.emit('goNextMsg', {
+        next_page: this.arr_of_next_pages[this.round_now],
+        round_time: this.time_of_round,
+      });
+      this.server.emit('timeIsUp');
+  }*/
+
+  /*@SubscribeMessage('drawImage')
   async drawImage(client: Socket, data: string) {
     const usr =  await this.usersRepository.find({ where: { socket_id: client.id } });
+    let nextId = 0;
+    for(let i = 0; i < this.users.length; i++){
+        if(this.users[i][0] === usr[0].id) {
+            nextId = this.users[i][1];
+            i=this.users.length;
+        }
+    }
 
     const session_row = new gameSession();
-    session_row.creator = usr[0].id;
-    session_row.prev;
+    session_row.creator;
+    session_row.prev = usr[0].id;
     session_row.data = data;
-    session_row.next;
+    session_row.next = nextId;
 
     await this.gameRepository.save(session_row);
 
@@ -232,7 +272,7 @@ export class EnterGame {
         this.time_of_round -= 5;
       }
 
-      this.logger.log('go to ' + this.arr_of_next_pages[this.round_now]);
+      /*this.logger.log('go to ' + this.arr_of_next_pages[this.round_now]);
       this.logger.log('Client ' + client.id + ' has drawed ' + 'data');
       this.logger.log('users: ' + this.users);
       this.logger.log('ready_of_all: ' + this.ready_of_all);
@@ -248,15 +288,32 @@ export class EnterGame {
       });
       this.round_now++;
 
-      /*this.timerId = setTimeout(() => {
+      for (let i = 0; i < this.users.length; i++) {
+        let variable = this.users[i][1] + 1;
+        if(variable>=this.users.length){
+            variable = 0;
+        }
+        this.users[i][1] = variable;
+      }
+
+      this.timerId = setTimeout(() => {
       this.server.emit('timeIsUp');
       if (this.timerId) {
             clearTimeout(this.timerId);
             this.timerId = 0;
         }
-    },this.time_of_round*1000);*/
+    },this.time_of_round*1000);
     }
-  }
+  }*/
+
+  /*@SubscribeMessage('whatToDraw')
+  async whatToDraw() {
+    this.server.emit('goNextMsg', {
+        next_page: this.arr_of_next_pages[this.round_now],
+        round_time: this.time_of_round,
+      });
+      this.server.emit('timeIsUp');
+  }*/
 
   @SubscribeMessage('timeIsUp')
   async timeIsUp() {
