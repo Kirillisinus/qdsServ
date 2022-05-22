@@ -80,14 +80,17 @@ export class AppService {
 
   async whatToDraw(name: string, creator: string): Promise<any> {
     const usr = await this.usersRepository.find({ where: { user: name } });
+    console.log(this.usrs);
 
     if (this.turn) {
       const ids_of_users = await this.usersRepository.query(
-        'SELECT u.id FROM users u WHERE u.in_game=true AND u.socket_id IS NOT NULL',
+        'SELECT u.id FROM users u WHERE u.in_game=true AND u.socket_id IS NOT NULL ORDER BY u.id DESC',
       );
 
-      this.usrs = ids_of_users[0];
-      console.log(this.usrs);
+      for (let i = 0; i < ids_of_users.length; i++) {
+        this.usrs.push(ids_of_users[i].id);
+      }
+      //console.log(this.usrs);
       this.turn = false;
     }
 
@@ -96,20 +99,24 @@ export class AppService {
       if (this.usrs[i] === usr[0].id) {
         if (i - 1 < 0) {
           crtr_id = this.usrs[this.usrs.length - 1];
+          i = this.usrs.length;
         }
+        else{
         crtr_id = this.usrs[i - 1];
         i = this.usrs.length;
+        }
       }
     }
 
     const usr_crtr = await this.usersRepository.find({
       where: { id: crtr_id },
     });
+    console.log(usr_crtr);
 
     const thing = await this.gameRepository.findOne({
       where: { next: usr[0].id, creator: crtr_id },
     });
-    console.log(thing);
+    //console.log(thing);
     const ans = { data: thing.data, creator: usr_crtr[0].user };
 
     return ans;

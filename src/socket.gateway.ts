@@ -40,7 +40,7 @@ export class EnterGame {
 
   num_of_rounds: number = 0;
   round_now: number = 0;
-  time_of_round: number = 30;
+  time_of_round: number = 60;
 
   arr_of_next_pages: string[] = [];
 
@@ -113,7 +113,7 @@ export class EnterGame {
     );
 
     const ids_of_users = await this.usersRepository.query(
-      'SELECT u.id FROM users u WHERE u.in_game=true AND u.socket_id IS NOT NULL',
+      'SELECT u.id FROM users u WHERE u.in_game=true AND u.socket_id IS NOT NULL ORDER BY u.id DESC',
     );
 
     for (let i = 0; i < ids_of_users.length; i++) {
@@ -169,6 +169,7 @@ export class EnterGame {
   @SubscribeMessage('writeData')
   async writeSentence(client: Socket, data: any) {
     const usr =  await this.usersRepository.find({ where: { socket_id: client.id } });
+    this.logger.log('client: ' + usr[0]);
     //const nextId = await this.usersRepository.query('SELECT nextval(\'game_session_pkid\')');
     let nextId = 0;
     for(let i = 0; i < this.users.length; i++){
@@ -178,7 +179,7 @@ export class EnterGame {
         }
     }
 
-    this.logger.log(data.sentence + " " + data.creator);
+    //this.logger.log(data.sentence + " " + data.creator);
 
     const usr_crtr =  await this.usersRepository.query("SELECT u.id FROM users as u where u.user=$1",[data.creator]);
 
@@ -186,6 +187,7 @@ export class EnterGame {
     session_row.creator = usr_crtr[0].id;
     session_row.prev = usr[0].id;
     session_row.data = data.sentence;
+    this.logger.log('this.users[' + nextId + '][0]: ' + this.users[nextId][0]);
     session_row.next = this.users[nextId][0];
 
     await this.gameRepository.save(session_row);
@@ -199,10 +201,11 @@ export class EnterGame {
       if (this.users.length > 1) {
         this.time_of_round -= 5;
       }
-
+      
+      
       /*this.logger.log('go to ' + this.arr_of_next_pages[this.round_now]);
       this.logger.log('Client ' + client.id + ' has written ' + data);
-      this.logger.log('users: ' + this.users);
+      
       this.logger.log('ready_of_all: ' + this.ready_of_all);
       this.logger.log('num_of_rounds: ' + this.num_of_rounds);
       this.logger.log('round_now: ' + this.round_now);
@@ -224,6 +227,7 @@ export class EnterGame {
         this.users[i][1] = variable;
       }
 
+      this.logger.log('users: ' + this.users);
       /*this.timerId = setTimeout(() => {
       this.server.emit('timeIsUp');
       if (this.timerId) {
