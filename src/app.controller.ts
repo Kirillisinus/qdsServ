@@ -21,4 +21,14 @@ export class AppController {
   async join(@Param('name') name): Promise<any> {
     return this.appService.join(name);
   }
+
+  @Get('whattomake/:name/:creator')
+  async whatToDraw(@Param('name') name, @Param('creat') creator): Promise<any> {
+    return this.appService.whatToDraw(name, creator);
+  }
+
+  /*@Get('whattowrite/:name/:creator')
+  async whatToWrite(@Param('name') name, @Param('creat') creator): Promise<any> {
+    return this.appService.whatToWrite(name, creator);
+  }*/
 }
