@@ -79,10 +79,11 @@ export class AppService {
   }*/
 
   async whatToDraw(name: string, creator: string): Promise<any> {
+    this.usrs = [];
     const usr = await this.usersRepository.find({ where: { user: name } });
-    console.log(this.usrs);
+    //console.log(usr);
 
-    if (this.turn) {
+    //if (this.turn) {
       const ids_of_users = await this.usersRepository.query(
         'SELECT u.id FROM users u WHERE u.in_game=true AND u.socket_id IS NOT NULL ORDER BY u.id DESC',
       );
@@ -92,32 +93,34 @@ export class AppService {
       }
       //console.log(this.usrs);
       this.turn = false;
-    }
+    //}
 
     let crtr_id = 0;
-    for (let i = 0; i < this.usrs.length; i++) {
-      if (this.usrs[i] === usr[0].id) {
+    for (let i = 0; i < ids_of_users.length; i++) {
+      if (ids_of_users[i].id === usr[0].id) {
         if (i - 1 < 0) {
-          crtr_id = this.usrs[this.usrs.length - 1];
-          i = this.usrs.length;
+          crtr_id = ids_of_users[ids_of_users.length - 1].id;
+          i = ids_of_users.length;
         }
         else{
-        crtr_id = this.usrs[i - 1];
-        i = this.usrs.length;
+        crtr_id = ids_of_users[i - 1].id;
+        i = ids_of_users.length;
         }
       }
     }
 
-    const usr_crtr = await this.usersRepository.find({
-      where: { id: crtr_id },
+    /*const usr_crtr = await this.usersRepository.find({
+      where: { user: creator },
     });
-    console.log(usr_crtr);
-
+    console.log(usr_crtr);*/
+    creator
     const thing = await this.gameRepository.findOne({
-      where: { next: usr[0].id, creator: crtr_id },
+      //where: { next: usr[0].id, creator: usr_crtr[0].id },
+      where: { next: usr[0].id, creator: creator },
     });
-    //console.log(thing);
-    const ans = { data: thing.data, creator: usr_crtr[0].user };
+    //console.log("For client with id " + usr[0].id + " creator(round) was " + creator + " and need do this: " + thing.data);
+    //const ans = { data: thing.data, creator: usr_crtr[0].user };
+    const ans = { data: thing.data};
 
     return ans;
   }

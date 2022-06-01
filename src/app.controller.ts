@@ -23,7 +23,7 @@ export class AppController {
   }
 
   @Get('whattomake/:name/:creator')
-  async whatToDraw(@Param('name') name, @Param('creat') creator): Promise<any> {
+  async whatToDraw(@Param('name') name, @Param('creator') creator): Promise<any> {
     return this.appService.whatToDraw(name, creator);
   }
 
