@@ -81,7 +81,8 @@ export class AppService {
   async whatToDraw(name: string, creator: string): Promise<any> {
     this.usrs = [];
     const usr = await this.usersRepository.find({ where: { user: name } });
-    //console.log(usr);
+    // console.log(usr);
+    // console.log(creator);
 
     //if (this.turn) {
       const ids_of_users = await this.usersRepository.query(
