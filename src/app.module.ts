@@ -27,7 +27,7 @@ import { gameSession } from './gameSession.entity';
       database: 'd1uvmmelf3brrh',
       entities: [Users, gameSession],
       synchronize: false,
-      logging: false,
+      logging: true,
       autoLoadEntities: true,
       ssl: { rejectUnauthorized: false }
     }),
@@ -36,4 +36,4 @@ import { gameSession } from './gameSession.entity';
   controllers: [AppController],
   providers: [AppService, EnterGame],
 })
-export class AppModule {}
+export class AppModule { }

@@ -140,13 +140,13 @@ export class EnterGame {
 
     this.round_now = 0;
 
-    this.logger.log('users: ' + this.users);
-    this.logger.log('ready_of_all: ' + this.ready_of_all);
-    this.logger.log('num_of_rounds: ' + this.num_of_rounds);
-    this.logger.log('round_now: ' + this.round_now);
-    this.logger.log('time_of_round: ' + this.time_of_round);
-    this.logger.log('arr_of_next_pages: ' + this.arr_of_next_pages);
-    this.logger.log('admin_id: ' + this.admin_id);
+    // this.logger.log('users: ' + this.users);
+    // this.logger.log('ready_of_all: ' + this.ready_of_all);
+    // this.logger.log('num_of_rounds: ' + this.num_of_rounds);
+    // this.logger.log('round_now: ' + this.round_now);
+    // this.logger.log('time_of_round: ' + this.time_of_round);
+    // this.logger.log('arr_of_next_pages: ' + this.arr_of_next_pages);
+    // this.logger.log('admin_id: ' + this.admin_id);
 
     this.server.emit('startMsg', this.time_of_round);
 
@@ -256,7 +256,7 @@ export class EnterGame {
         this.users[i][1] = variable;
       }
 
-      this.logger.log('users: ' + this.users);
+      // this.logger.log('users: ' + this.users);
       /*this.timerId = setTimeout(() => {
       this.server.emit('timeIsUp');
       if (this.timerId) {

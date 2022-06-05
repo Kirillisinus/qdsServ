@@ -27,8 +27,8 @@ export class AppController {
     return this.appService.whatToDraw(name, creator);
   }
 
-  /*@Get('whattowrite/:name/:creator')
-  async whatToWrite(@Param('name') name, @Param('creat') creator): Promise<any> {
-    return this.appService.whatToWrite(name, creator);
-  }*/
+  @Get('history')
+  async getHistory(): Promise<any> {
+    return this.appService.getHistory();
+  }
 }
