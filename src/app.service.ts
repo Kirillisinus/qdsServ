@@ -6,6 +6,16 @@ import { User } from './user.model';
 import { EnterGame } from './socket.gateway';
 import { gameSession } from './gameSession.entity';
 
+class History {
+  name: string
+  items: any[]
+
+  constructor(userName: string, array: string[]) {
+    this.name = userName;
+    this.items = array;
+  }
+}
+
 @Injectable()
 export class AppService {
   constructor(
@@ -14,7 +24,7 @@ export class AppService {
 
     @InjectRepository(gameSession)
     private readonly gameRepository: Repository<gameSession>,
-  ) {}
+  ) { }
 
   usrs: number[] = [];
   turn: boolean = true;
@@ -72,27 +82,68 @@ export class AppService {
     return users;
   }
 
-  /*async whatToWrite(name: string, creator: string): Promise<any> {
-    const usr =  await this.usersRepository.find({ where: { user: name } });
-    const sentence = await this.gameRepository.findOne({ where: { creator: creator, next: usr[0].id } });
-    return sentence;
-  }*/
+  async getHistory(): Promise<any> {
+    const users = await this.usersRepository.query(
+      'SELECT * FROM users as u WHERE u.in_game=true AND u.socket_id IS NOT NULL AND u.exp_date > CURRENT_DATE ORDER BY u.id DESC;',
+    );
+    // console.log(users);
+    const rounds = await this.gameRepository.query("SELECT creator FROM game_session group by creator order by creator ASC");
+    // console.log(rounds);
+    const users_in_session = await this.gameRepository.query("SELECT prev FROM game_session group by prev order by prev ASC");
+    // console.log(users_in_session);
+    // const game_session_for_user1 = await this.gameRepository.query("SELECT * FROM game_session WHERE creator = $1 AND prev = $2 order by creator ASC", [0, users_in_session[0].prev]);
+
+    let history_items = [];
+    // history_items.push(game_session_for_user1[0].data);
+
+    let history_marker = 0;
+
+    let history_obj: History[] = [];
+
+    //history_obj[0] = new History(usr_for_history1[0].user, history_items);
+
+    for (let i = 0; i < users_in_session.length; i++) {
+      history_marker = users_in_session[i].prev;
+      for (let j = 0; j < rounds.length; j++) {
+        const game_session_for_user = await this.gameRepository.query("SELECT * FROM game_session WHERE creator = $1 AND prev = $2 order by creator ASC", [rounds[j].creator, history_marker]);
+
+        history_marker = game_session_for_user[0].next;
+
+        const obj = {
+          creator: game_session_for_user[0].prev,
+          data: game_session_for_user[0].data
+        };
+
+        history_items.push(obj);
+
+        // console.log("Items for user with id " + history_marker + " is " + history_items[j]);
+      }
+      const usr_for_history = await this.usersRepository.query(
+        'SELECT u.user FROM users as u WHERE u.id=$1;', [users_in_session[i].prev]
+      );
+      history_obj[i] = new History(usr_for_history[0].user, history_items);
+      history_items = [];
+    }
+
+    return history_obj;
+  }
 
   async whatToDraw(name: string, creator: string): Promise<any> {
     this.usrs = [];
     const usr = await this.usersRepository.find({ where: { user: name } });
-    //console.log(usr);
+    // console.log(usr);
+    // console.log(creator);
 
     //if (this.turn) {
-      const ids_of_users = await this.usersRepository.query(
-        'SELECT u.id FROM users u WHERE u.in_game=true AND u.socket_id IS NOT NULL ORDER BY u.id DESC',
-      );
+    const ids_of_users = await this.usersRepository.query(
+      'SELECT u.id FROM users u WHERE u.in_game=true AND u.socket_id IS NOT NULL ORDER BY u.id DESC',
+    );
 
-      for (let i = 0; i < ids_of_users.length; i++) {
-        this.usrs.push(ids_of_users[i].id);
-      }
-      //console.log(this.usrs);
-      this.turn = false;
+    for (let i = 0; i < ids_of_users.length; i++) {
+      this.usrs.push(ids_of_users[i].id);
+    }
+    //console.log(this.usrs);
+    this.turn = false;
     //}
 
     let crtr_id = 0;
@@ -102,9 +153,9 @@ export class AppService {
           crtr_id = ids_of_users[ids_of_users.length - 1].id;
           i = ids_of_users.length;
         }
-        else{
-        crtr_id = ids_of_users[i - 1].id;
-        i = ids_of_users.length;
+        else {
+          crtr_id = ids_of_users[i - 1].id;
+          i = ids_of_users.length;
         }
       }
     }
@@ -113,17 +164,16 @@ export class AppService {
       where: { user: creator },
     });
     console.log(usr_crtr);*/
-    creator
     const thing = await this.gameRepository.findOne({
       //where: { next: usr[0].id, creator: usr_crtr[0].id },
       where: { next: usr[0].id, creator: creator },
     });
     //console.log("For client with id " + usr[0].id + " creator(round) was " + creator + " and need do this: " + thing.data);
     //const ans = { data: thing.data, creator: usr_crtr[0].user };
-    const ans = { data: thing.data};
+    const ans = { data: thing.data };
 
     return ans;
   }
 
-  join(name: string): any {}
+  join(name: string): any { }
 }
