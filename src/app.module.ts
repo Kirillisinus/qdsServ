@@ -11,25 +11,15 @@ import { gameSession } from './gameSession.entity';
   imports: [
     ConfigModule.forRoot(),
     TypeOrmModule.forRoot({
-      /*type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: '1234',
-      database: 'appdb',
-      entities: [Users,gameSession],
-      synchronize: false,
-      logging: true
-      */
       type: 'postgres',
-      host: 'ec2-63-32-248-14.eu-west-1.compute.amazonaws.com',
+      host: 'ec2-34-242-8-97.eu-west-1.compute.amazonaws.com',
       port: 5432,
-      username: 'awjqkgiaynfnrq',
-      password: 'c69dd8fdc4129e39e5375e06c720358b4598d8d55a640fabd3fd59ebbbb2aed8',
-      database: 'd1uvmmelf3brrh',
+      username: 'ikuzrwxffsywjz',
+      password: '406099b9e10d2a079d3779910acb4309e7b59505ef02204a61998885a6eee1ad',
+      database: 'd38sfo2rqhlo07',
       entities: [Users, gameSession],
       synchronize: false,
-      logging: true,
+      logging: false,
       autoLoadEntities: true,
       ssl: { rejectUnauthorized: false }
     }),
