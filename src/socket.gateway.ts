@@ -90,13 +90,6 @@ export class EnterGame {
     this.logger.log(`Client with id: ${client.id}` + ' left lobby');
   }
 
-  /*@SubscribeMessage('ready')
-  async ready(client: Socket, payload: string): Promise<void> {
-    await this.usersRepository.query("UPDATE users u SET is_ready=true WHERE u.user=$1",[payload]);
-
-    this.logger.log(`Client with id: ${client.id}`+" is ready now");
-  }*/
-
   @SubscribeMessage('startGame')
   async startGame(client: Socket, data: string): Promise<void> {
     this.users = [];
@@ -222,8 +215,8 @@ export class EnterGame {
 
       //this.logger.log('ready_of_all: ' + this.ready_of_all);
       //this.logger.log('num_of_rounds: ' + this.num_of_rounds);
-     // this.logger.log('round_now: ' + this.round_now);
-     // this.logger.log('time_of_round: ' + this.time_of_round);
+      // this.logger.log('round_now: ' + this.round_now);
+      // this.logger.log('time_of_round: ' + this.time_of_round);
       //this.logger.log('arr_of_next_pages: ' + this.arr_of_next_pages);
       //this.logger.log('admin_id: ' + this.admin_id);
 
@@ -266,87 +259,6 @@ export class EnterGame {
     },this.time_of_round*1000);*/
     }
   }
-
-  /* @SubscribeMessage('whatToWrite')
-   async whatWrite() {
-     this.server.emit('goNextMsg', {
-         next_page: this.arr_of_next_pages[this.round_now],
-         round_time: this.time_of_round,
-       });
-       this.server.emit('timeIsUp');
-   }*/
-
-  /*@SubscribeMessage('drawImage')
-  async drawImage(client: Socket, data: string) {
-    const usr =  await this.usersRepository.find({ where: { socket_id: client.id } });
-    let nextId = 0;
-    for(let i = 0; i < this.users.length; i++){
-        if(this.users[i][0] === usr[0].id) {
-            nextId = this.users[i][1];
-            i=this.users.length;
-        }
-    }
-
-    const session_row = new gameSession();
-    session_row.creator;
-    session_row.prev = usr[0].id;
-    session_row.data = data;
-    session_row.next = nextId;
-
-    await this.gameRepository.save(session_row);
-
-    this.ready_of_all--;
-
-    if (this.ready_of_all <= 0) {
-      //clearTimeout(this.timerId);
-      this.ready_of_all = this.users.length;
-
-      if (this.users.length > 1) {
-        this.time_of_round -= 5;
-      }
-
-      /*this.logger.log('go to ' + this.arr_of_next_pages[this.round_now]);
-      this.logger.log('Client ' + client.id + ' has drawed ' + 'data');
-      this.logger.log('users: ' + this.users);
-      this.logger.log('ready_of_all: ' + this.ready_of_all);
-      this.logger.log('num_of_rounds: ' + this.num_of_rounds);
-      this.logger.log('round_now: ' + this.round_now);
-      this.logger.log('time_of_round: ' + this.time_of_round);
-      this.logger.log('arr_of_next_pages: ' + this.arr_of_next_pages);
-      this.logger.log('admin_id: ' + this.admin_id);
-
-      this.server.emit('goNextMsg', {
-        next_page: this.arr_of_next_pages[this.round_now],
-        round_time: this.time_of_round,
-      });
-      this.round_now++;
-
-      for (let i = 0; i < this.users.length; i++) {
-        let variable = this.users[i][1] + 1;
-        if(variable>=this.users.length){
-            variable = 0;
-        }
-        this.users[i][1] = variable;
-      }
-
-      this.timerId = setTimeout(() => {
-      this.server.emit('timeIsUp');
-      if (this.timerId) {
-            clearTimeout(this.timerId);
-            this.timerId = 0;
-        }
-    },this.time_of_round*1000);
-    }
-  }*/
-
-  /*@SubscribeMessage('whatToDraw')
-  async whatToDraw() {
-    this.server.emit('goNextMsg', {
-        next_page: this.arr_of_next_pages[this.round_now],
-        round_time: this.time_of_round,
-      });
-      this.server.emit('timeIsUp');
-  }*/
 
   @SubscribeMessage('timeIsUp')
   async timeIsUp() {
