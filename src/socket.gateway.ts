@@ -40,7 +40,7 @@ export class EnterGame {
 
   num_of_rounds: number = 0;
   round_now: number = 0;
-  time_of_round: number = 60;
+  time_of_round: number = 15;
 
   arr_of_next_pages: string[] = [];
 
