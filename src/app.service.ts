@@ -93,8 +93,10 @@ export class AppService {
 
         history_marker = game_session_for_user[0].next;
 
+        const name_of_user = await this.gameRepository.query("SELECT u.user FROM users as u WHERE u.id = $1", [game_session_for_user[0].prev]);
+
         const obj = {
-          creator: game_session_for_user[0].prev,
+          creator: name_of_user[0].user,
           data: game_session_for_user[0].data
         };
 
